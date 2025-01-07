@@ -1904,6 +1904,24 @@ constexpr bool operator==(const T1& left, const option<T2>& right);
 If `right` contains a value, then compare it with `left` using operator `==`; otherwise, return `false`.
 - *Enabled* when the implicit conversion to `bool` of expression `left == right.get()` is well-formed.
 
+---
+
+```cpp
+template<class T1, class T2>
+constexpr bool operator==(const option<T1>& left, const std::optional<T2>& right);
+```
+Same as `operator==(const option<T1>&, const option<T2>&)` but for `std::optional`.
+- *Defined* when [`OPTION_STD_OPTIONAL_COMPATIBILITY`][OPTION_STD_OPTIONAL_COMPATIBILITY] is true.
+
+---
+
+```cpp
+template<class T1, class T2>
+constexpr bool operator==(const std::optional<T1>& left, const option<T2>& right);
+```
+Same as `operator==(const option<T1>&, const option<T2>&)` but for `std::optional`.
+- *Defined* when [`OPTION_STD_OPTIONAL_COMPATIBILITY`][OPTION_STD_OPTIONAL_COMPATIBILITY] is true.
+
 ### `operator!=`
 ```cpp
 template<class T1, class T2>
@@ -1945,6 +1963,24 @@ constexpr bool operator!=(const T1& left, const option<T2>& right);
 ```
 If `right` contains a value, then compare it with `left` using operator `!=`; otherwise, return `true`.
 - *Enabled* when the implicit conversion to `bool` of expression `left != right.get()` is well-formed.
+
+---
+
+```cpp
+template<class T1, class T2>
+constexpr bool operator!=(const option<T1>& left, const std::optional<T2>& right);
+```
+Same as `operator!=(const option<T1>&, const option<T2>&)` but for `std::optional`.
+- *Defined* when [`OPTION_STD_OPTIONAL_COMPATIBILITY`][OPTION_STD_OPTIONAL_COMPATIBILITY] is true.
+
+---
+
+```cpp
+template<class T1, class T2>
+constexpr bool operator!=(const std::optional<T1>& left, const option<T2>& right);
+```
+Same as `operator!=(const option<T1>&, const option<T2>&)` but for `std::optional`.
+- *Defined* when [`OPTION_STD_OPTIONAL_COMPATIBILITY`][OPTION_STD_OPTIONAL_COMPATIBILITY] is true.
 
 ### `operator<`
 ```cpp
@@ -1988,6 +2024,24 @@ constexpr bool operator<(const T1& left, const option<T2>& right);
 If `right` contains a value, then compare it with `left` using operator `<`; otherwise, return `false`.
 - *Enabled* when the implicit conversion to `bool` of expression `left < right.get()` is well-formed.
 
+---
+
+```cpp
+template<class T1, class T2>
+constexpr bool operator<(const option<T1>& left, const std::optional<T2>& right);
+```
+Same as `operator<(const option<T1>&, const option<T2>&)` but for `std::optional`.
+- *Defined* when [`OPTION_STD_OPTIONAL_COMPATIBILITY`][OPTION_STD_OPTIONAL_COMPATIBILITY] is true.
+
+---
+
+```cpp
+template<class T1, class T2>
+constexpr bool operator<(const std::optional<T1>& left, const option<T2>& right);
+```
+Same as `operator<(const option<T1>&, const option<T2>&)` but for `std::optional`.
+- *Defined* when [`OPTION_STD_OPTIONAL_COMPATIBILITY`][OPTION_STD_OPTIONAL_COMPATIBILITY] is true.
+
 ### `operator<=`
 ```cpp
 template<class T1, class T2>
@@ -2029,6 +2083,24 @@ constexpr bool operator<=(const T1& left, const option<T2>& right);
 ```
 If `right` contains a value, then compare it with `left` using operator `<=`; otherwise, return `false`.
 - *Enabled* when the implicit conversion to `bool` of expression `left <= right.get()` is well-formed.
+
+---
+
+```cpp
+template<class T1, class T2>
+constexpr bool operator<=(const option<T1>& left, const std::optional<T2>& right);
+```
+Same as `operator<=(const option<T1>&, const option<T2>&)` but for `std::optional`.
+- *Defined* when [`OPTION_STD_OPTIONAL_COMPATIBILITY`][OPTION_STD_OPTIONAL_COMPATIBILITY] is true.
+
+---
+
+```cpp
+template<class T1, class T2>
+constexpr bool operator<=(const std::optional<T1>& left, const option<T2>& right);
+```
+Same as `operator<=(const option<T1>&, const option<T2>&)` but for `std::optional`.
+- *Defined* when [`OPTION_STD_OPTIONAL_COMPATIBILITY`][OPTION_STD_OPTIONAL_COMPATIBILITY] is true.
 
 ### `operator>`
 ```cpp
@@ -2072,6 +2144,24 @@ constexpr bool operator>(const T1& left, const option<T2>& right);
 If `right` contains a value, then compare it with `left` using operator `>`; otherwise, return `true`.
 - *Enabled* when the implicit conversion to `bool` of expression `left > right.get()` is well-formed.
 
+---
+
+```cpp
+template<class T1, class T2>
+constexpr bool operator>(const option<T1>& left, const std::optional<T2>& right);
+```
+Same as `operator>(const option<T1>&, const option<T2>&)` but for `std::optional`.
+- *Defined* when [`OPTION_STD_OPTIONAL_COMPATIBILITY`][OPTION_STD_OPTIONAL_COMPATIBILITY] is true.
+
+---
+
+```cpp
+template<class T1, class T2>
+constexpr bool operator>(const std::optional<T1>& left, const option<T2>& right);
+```
+Same as `operator>(const option<T1>&, const option<T2>&)` but for `std::optional`.
+- *Defined* when [`OPTION_STD_OPTIONAL_COMPATIBILITY`][OPTION_STD_OPTIONAL_COMPATIBILITY] is true.
+
 ### `operator>=`
 ```cpp
 template<class T1, class T2>
@@ -2113,6 +2203,24 @@ constexpr bool operator>=(const T1& left, const option<T2>& right);
 ```
 If `right` contains a value, then compare it with `left` using operator `=>`; otherwise, return `true`.
 - *Enabled* when the implicit conversion to `bool` of expression `left >= right.get()` is well-formed.
+
+---
+
+```cpp
+template<class T1, class T2>
+constexpr bool operator>=(const option<T1>& left, const std::optional<T2>& right);
+```
+Same as `operator>=(const option<T1>&, const option<T2>&)` but for `std::optional`.
+- *Defined* when [`OPTION_STD_OPTIONAL_COMPATIBILITY`][OPTION_STD_OPTIONAL_COMPATIBILITY] is true.
+
+---
+
+```cpp
+template<class T1, class T2>
+constexpr bool operator>=(const std::optional<T1>& left, const option<T2>& right);
+```
+Same as `operator>=(const option<T1>&, const option<T2>&)` but for `std::optional`.
+- *Defined* when [`OPTION_STD_OPTIONAL_COMPATIBILITY`][OPTION_STD_OPTIONAL_COMPATIBILITY] is true.
 
 ## Helpers
 
@@ -2498,6 +2606,7 @@ Attribute `[[msvc::lifetimebound]]` (see [C26815][msvc-C26815] and [C26816][msvc
 
 [UB]: https://en.cppreference.com/w/cpp/language/ub
 [option-verify]: ./macros.md#option_verify
+[OPTION_STD_OPTIONAL_COMPATIBILITY]: ./macros.md#option_std_optional_compatibility
 [pfr is_reflectable]: https://www.boost.org/doc/libs/1_86_0/doc/html/doxygen/reference_section_of_pfr/structboost_1_1pfr_1_1is__reflectable.html
 [std::is_array]: https://en.cppreference.com/w/cpp/types/is_array
 [std::is_destructible]: https://en.cppreference.com/w/cpp/types/is_destructible

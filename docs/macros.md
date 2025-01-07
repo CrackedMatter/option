@@ -43,6 +43,11 @@ Enables support for Clang's [Consumed Annotation Checking][Consumed Annotation C
 > [!NOTE]
 > This is really not recommended to use it because [`-Wconsumed`][Wconsumed] gives too many false positives.
 
+### OPTION_STD_OPTIONAL_COMPATIBILITY
+*expects:* `boolean`, *default:* `false`
+
+Makes `opt::option` compatible with `std::optional` (e.g. adds comparison operators that works with both `opt::option` and `std::optional`) .
+
 ## **boost.pfr**/**pfr** library related
 
 ### OPTION_PFR_FILE

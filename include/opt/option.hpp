@@ -15,6 +15,14 @@
 
 #include <opt/option_fwd.hpp>
 
+#ifndef OPTION_STD_OPTIONAL_COMPATIBILITY
+    #define OPTION_STD_OPTIONAL_COMPATIBILITY 0
+#endif
+
+#if OPTION_STD_OPTIONAL_COMPATIBILITY
+    #include <optional>
+#endif
+
 #ifdef __INTEL_COMPILER
     #define OPTION_CLANG 0
     #define OPTION_GCC   0
@@ -3874,6 +3882,104 @@ template<class T1, class T2>
     -> decltype(impl::fake_copy<bool>(left >= right.get())) {
     return right.has_value() ? left >= right.get() : true;
 }
+#if OPTION_STD_OPTIONAL_COMPATIBILITY
+template<class T1, class T2>
+[[nodiscard]] constexpr auto operator==(const opt::option<T1>& left, const std::optional<T2>& right)
+    -> decltype(impl::fake_copy<bool>(left.get() == *right)) {
+    const bool left_has_value = left.has_value();
+    const bool right_has_value = right.has_value();
+    if (left_has_value && right_has_value) { return left.get() == *right; }
+    return left_has_value == right_has_value;
+}
+template<class T1, class T2>
+[[nodiscard]] constexpr auto operator==(const std::optional<T1>& left, const opt::option<T2>& right)
+    -> decltype(impl::fake_copy<bool>(*left == right.get())) {
+    const bool left_has_value = left.has_value();
+    const bool right_has_value = right.has_value();
+    if (left_has_value && right_has_value) { return *left == right.get(); }
+    return left_has_value == right_has_value;
+}
+template<class T1, class T2>
+[[nodiscard]] constexpr auto operator!=(const opt::option<T1>& left, const std::optional<T2>& right)
+    -> decltype(impl::fake_copy<bool>(left.get() != *right)) {
+    const bool left_has_value = left.has_value();
+    const bool right_has_value = right.has_value();
+    if (left_has_value && right_has_value) { return left.get() != *right; }
+    return left_has_value != right_has_value;
+}
+template<class T1, class T2>
+[[nodiscard]] constexpr auto operator!=(const std::optional<T1>& left, const opt::option<T2>& right)
+    -> decltype(impl::fake_copy<bool>(*left != right.get())) {
+    const bool left_has_value = left.has_value();
+    const bool right_has_value = right.has_value();
+    if (left_has_value && right_has_value) { return *left != right.get(); }
+    return left_has_value != right_has_value;
+}
+template<class T1, class T2>
+[[nodiscard]] constexpr auto operator<(const opt::option<T1>& left, const std::optional<T2>& right)
+    -> decltype(impl::fake_copy<bool>(left.get() < *right)) {
+    const bool left_has_value = left.has_value();
+    const bool right_has_value = right.has_value();
+    if (left_has_value && right_has_value) { return left.get() < *right; }
+    return left_has_value < right_has_value;
+}
+template<class T1, class T2>
+[[nodiscard]] constexpr auto operator<(const std::optional<T1>& left, const opt::option<T2>& right)
+    -> decltype(impl::fake_copy<bool>(*left < right.get())) {
+    const bool left_has_value = left.has_value();
+    const bool right_has_value = right.has_value();
+    if (left_has_value && right_has_value) { return *left < right.get(); }
+    return left_has_value < right_has_value;
+}
+template<class T1, class T2>
+[[nodiscard]] constexpr auto operator<=(const opt::option<T1>& left, const std::optional<T2>& right)
+    -> decltype(impl::fake_copy<bool>(left.get() <= *right)) {
+    const bool left_has_value = left.has_value();
+    const bool right_has_value = right.has_value();
+    if (left_has_value && right_has_value) { return left.get() <= *right; }
+    return left_has_value <= right_has_value;
+}
+template<class T1, class T2>
+[[nodiscard]] constexpr auto operator<=(const std::optional<T1>& left, const opt::option<T2>& right)
+    -> decltype(impl::fake_copy<bool>(*left <= right.get())) {
+    const bool left_has_value = left.has_value();
+    const bool right_has_value = right.has_value();
+    if (left_has_value && right_has_value) { return *left <= right.get(); }
+    return left_has_value <= right_has_value;
+}
+template<class T1, class T2>
+[[nodiscard]] constexpr auto operator>(const opt::option<T1>& left, const std::optional<T2>& right)
+    -> decltype(impl::fake_copy<bool>(left.get() > *right)) {
+    const bool left_has_value = left.has_value();
+    const bool right_has_value = right.has_value();
+    if (left_has_value && right_has_value) { return left.get() > *right; }
+    return left_has_value > right_has_value;
+}
+template<class T1, class T2>
+[[nodiscard]] constexpr auto operator>(const std::optional<T1>& left, const opt::option<T2>& right)
+    -> decltype(impl::fake_copy<bool>(*left > right.get())) {
+    const bool left_has_value = left.has_value();
+    const bool right_has_value = right.has_value();
+    if (left_has_value && right_has_value) { return *left > right.get(); }
+    return left_has_value > right_has_value;
+}
+template<class T1, class T2>
+[[nodiscard]] constexpr auto operator>=(const opt::option<T1>& left, const std::optional<T2>& right)
+    -> decltype(impl::fake_copy<bool>(left.get() >= *right)) {
+    const bool left_has_value = left.has_value();
+    const bool right_has_value = right.has_value();
+    if (left_has_value && right_has_value) { return left.get() >= *right; }
+    return left_has_value >= right_has_value;
+}
+template<class T1, class T2>
+[[nodiscard]] constexpr auto operator>=(const std::optional<T1>& left, const opt::option<T2>& right)
+    -> decltype(impl::fake_copy<bool>(*left >= right.get())) {
+    const bool left_has_value = left.has_value();
+    const bool right_has_value = right.has_value();
+    if (left_has_value && right_has_value) { return *left >= right.get(); }
+    return left_has_value >= right_has_value;
+}
+#endif // OPTION_STD_OPTIONAL_COMPATIBILITY
 
 namespace impl {
     template<class T>

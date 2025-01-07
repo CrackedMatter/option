@@ -11,6 +11,7 @@ add_executable(option-test
     "meta.test.cpp"
     "functions.test.cpp"
     "constexpr.test.cpp"
+    "std_optional_compatibility.cpp"
     "main.cpp"
     
     "utils.hpp"
