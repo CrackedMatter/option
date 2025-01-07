@@ -2973,7 +2973,7 @@ public:
     constexpr option& operator=(const option<U>& other) {
         if constexpr (std::is_reference_v<T>) {
             if (other.has_value()) {
-                base::value = base::ref_to_ptr(static_cast<option<U>&&>(other.get()));
+                base::value = base::ref_to_ptr(other.get());
             } else {
                 reset();
             }

@@ -259,6 +259,17 @@ TEST_CASE("reference") {
         }
         // NOLINTEND(misc-const-correctness)
     }
+    SUBCASE("operator=") {
+        int val = 1;
+        opt::option<int&> a;
+        const opt::option<std::reference_wrapper<int>> b{val};
+        a = b;
+        CHECK_EQ(a, val);
+        CHECK_EQ(a.ptr_or_null(), &val);
+        a = opt::option{std::ref(val)};
+        CHECK_EQ(a, val);
+        CHECK_EQ(a.ptr_or_null(), &val);
+    }
 }
 
 // NOLINTBEGIN(performance-move-const-arg,bugprone-use-after-move)
