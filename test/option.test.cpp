@@ -61,6 +61,10 @@ template<> struct sample_values<std::reference_wrapper<int>> {
     int values_orig[5]{1, 2, 3, 4, 5};
     std::reference_wrapper<int> values[5]{values_orig[0], values_orig[1], values_orig[2], values_orig[3], values_orig[4]};
 };
+template<> struct sample_values<std::reference_wrapper<const int>> {
+    const int values_orig[5]{1, 2, 3, 4, 5};
+    std::reference_wrapper<const int> values[5]{values_orig[0], values_orig[1], values_orig[2], values_orig[3], values_orig[4]};
+};
 template<> struct sample_values<int*> {
     int values_orig[5]{1, 2, 3, 4, 5};
     int* values[5]{&values_orig[0], &values_orig[1], &values_orig[2], &values_orig[3], &values_orig[4]};
@@ -1094,6 +1098,7 @@ const int reg_tests_var = (
         double,
         bool,
         std::reference_wrapper<int>,
+        std::reference_wrapper<const int>,
         int*,
         float,
         std::pair<int, float>,
