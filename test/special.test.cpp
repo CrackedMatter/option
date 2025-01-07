@@ -85,6 +85,12 @@ struct std::tuple_element<I, my_ns::my_tuple<T1, T2, T3>> {
     using type = std::conditional_t<I == 0, T1, std::conditional_t<I == 1, T2, T3>>;
 };
 
+struct base_type {};
+struct derived_type : base_type {};
+
+template<>
+struct opt::option_traits<derived_type> { static constexpr std::uintmax_t max_level = 0; };
+
 // NOLINTEND(cert-dcl58-cpp)
 
 namespace {
@@ -238,6 +244,20 @@ TEST_CASE("reference") {
         CHECK(a.has_value());
         CHECK(b.has_value());
         CHECK_EQ(&*a, &*b);
+    }
+    SUBCASE("lvalue") {
+        // NOLINTBEGIN(misc-const-correctness)
+        {
+            derived_type a{};
+            base_type& b{a};
+            (void)b;
+        }
+        {
+            opt::option<derived_type&> a{};
+            opt::option<base_type&> b{a};
+            (void)b;
+        }
+        // NOLINTEND(misc-const-correctness)
     }
 }
 

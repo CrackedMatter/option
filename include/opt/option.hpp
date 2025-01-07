@@ -2638,6 +2638,9 @@ namespace impl {
     struct always_non_explicit {
         template<bool Condition>
         using is_explicit = std::enable_if<!Condition, int>;
+
+        template<bool Condition>
+        using constructor_is_explicit = std::enable_if<!Condition, int>;
     };
     template<class T, class U>
     struct check_from_value_ctor {
@@ -2712,6 +2715,13 @@ namespace impl {
             && is_initializable_from_v<T, QualU>,
             check_option_like_ctor<T, U, QualU>, option_check_fail
         >;
+#if OPTION_STD_OPTIONAL_COMPATIBILITY
+        template<class T, class U, class QualU>
+        using from_std_optional_ctor = if_<
+            is_initializable_from_v<T, QualU>,
+            check_option_like_ctor<T, U, QualU>, option_check_fail
+        >;
+#endif // OPTION_STD_OPTIONAL_COMPATIBILITY
         template<class T, class U, class QualU>
         using from_option_like_assign = if_<
             is_not_same_v<U, T>
@@ -2760,6 +2770,15 @@ namespace impl {
                 && (std::is_lvalue_reference_v<T> == std::is_lvalue_reference_v<U>))),
             always_non_explicit, option_check_fail
         >;
+#if OPTION_STD_OPTIONAL_COMPATIBILITY
+        template<class T, class U, class QualU>
+        using from_std_optional_ctor = if_<
+            is_same_reference_wrapper_v<std::remove_reference_t<T>, std::remove_reference_t<U>>
+                || (std::is_convertible_v<std::remove_reference_t<U>*, std::remove_reference_t<T>*>
+                && (std::is_lvalue_reference_v<T> == std::is_lvalue_reference_v<U>)),
+            always_non_explicit, option_check_fail
+        >;
+#endif // OPTION_STD_OPTIONAL_COMPATIBILITY
         template<class T, class U, class QualU>
         using from_option_like_assign = if_<
             is_not_same_v<U, T>
@@ -2888,6 +2907,37 @@ public:
             base::construct(static_cast<option<U>&&>(other).get());
         }
     }
+
+#if OPTION_STD_OPTIONAL_COMPATIBILITY
+    template<class U,
+        typename checks::template from_std_optional_ctor<T, U, const U&>::template constructor_is_explicit<false>::type = 0>
+    constexpr option(const std::optional<U>& other) {
+        if (other.has_value()) {
+            base::construct(*other);
+        }
+    }
+    template<class U,
+        typename checks::template from_std_optional_ctor<T, U, const U&>::template constructor_is_explicit<true>::type = 0>
+    constexpr explicit option(const std::optional<U>& other) {
+        if (other.has_value()) {
+            base::construct(*other);
+        }
+    }
+    template<class U,
+        typename checks::template from_std_optional_ctor<T, U, U&&>::template constructor_is_explicit<false>::type = 0>
+    constexpr option(std::optional<U>&& other) {
+        if (other.has_value()) {
+            base::construct(*static_cast<std::optional<U>&&>(other));
+        }
+    }
+    template<class U,
+        typename checks::template from_std_optional_ctor<T, U, U&&>::template constructor_is_explicit<true>::type = 0>
+    constexpr explicit option(std::optional<U>&& other) {
+        if (other.has_value()) {
+            base::construct(*static_cast<std::optional<U>&&>(other));
+        }
+    }
+#endif // OPTION_STD_OPTIONAL_COMPATIBILITY
 
     OPTION_SET_TYPESTATE(unconsumed)
     constexpr option& operator=(opt::none_t) noexcept {

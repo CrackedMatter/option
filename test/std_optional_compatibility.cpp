@@ -41,6 +41,26 @@ TEST_CASE("comparison operators") {
     }
 }
 
+TEST_CASE("construct from std::optional") {
+    const std::optional<int> val = 1;
+
+    const opt::option<int> a = std::optional<int>{1};
+    CHECK_EQ(a, 1);
+
+    struct explicit_type {
+        explicit explicit_type(int x_) : x{x_} {}
+        int x;
+    };
+    const opt::option<explicit_type> b{std::optional<int>{1}};
+    CHECK_EQ(b->x, 1);
+
+    const opt::option<int> c = val;
+    CHECK_EQ(c, 1);
+
+    const opt::option<explicit_type> d{val};
+    CHECK_EQ(d->x, 1);
+}
+
 TEST_SUITE_END();
 
 }
