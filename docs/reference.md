@@ -176,10 +176,8 @@ Where `{construct}` is a function that constructs contained object in place.
 - *Enabled* when the following conditions are true:
     - If `T` is a non-reference type:
       - `std::is_constructible_v<T, const U&>`.
-      - `!std::is_same_v<T, U>`.
       - `std::is_same_v<remove_cvref<T>, bool> || !is_constructible_from_option<T, U>`. ([`remove_cvref`](#remove_cvrefx), [`is_constructible_from_option`](#is_constructible_from_optionx-y)).
     - Otherwise, if `T` is a reference type:
-      - `!std::is_same_v<T, U>`,
       - [`can_bind_reference<T, U>`](#can_bind_referencex-y).
 - *Postcondition:* `has_value() == other.has_value()`.
 ---
@@ -207,6 +205,62 @@ Where `{construct}` is a function that constructs contained object in place.
       - `std::is_same_v<std::remove_cv_t<T>, bool> || !is_constructible_from_option<T, U>`. ([`is_constructible_from_option`](#is_constructible_from_optionx-y),  [`remove_cvref`](#remove_cvrefx))
     - Otherwise, if `T` is a reference type:
       - `!std::is_same_v<T, U>`,
+      - [`can_bind_reference<T, U>`](#can_bind_referencex-y).
+- *Postcondition:* `has_value() == other.has_value()`.
+
+---
+
+```cpp
+template<class U>
+constexpr explicit(/*see below*/) option(const std::optional<U>& other);
+```
+Converting copy constructor. \
+Constructs an object of type `T` using *direct-list-initialization* with the expression `other.get()` if `other` contains a value. If `other` does not contain a value, construct an empty `opt::option` object instead.
+
+Description in the code equivalent:
+```cpp
+if (other.has_value()) {
+    {construct}(other.get());
+}
+```
+Where `{construct}` is a function that constructs contained object in place.
+
+- *Defined* when [`OPTION_STD_OPTIONAL_COMPATIBILITY`][OPTION_STD_OPTIONAL_COMPATIBILITY] is true.
+- *`explicit`* when `!std::is_reference_v<T>` and `!std::is_convertible_v<const U&, T>`.
+- *Enabled* when the following conditions are true:
+    - If `T` is a non-reference type:
+      - `std::is_constructible_v<T, const U&>`.
+      - `!std::is_same_v<T, U>`.
+      - `std::is_same_v<remove_cvref<T>, bool> || !is_constructible_from_option<T, U>`. ([`remove_cvref`](#remove_cvrefx), [`is_constructible_from_option`](#is_constructible_from_optionx-y)).
+    - Otherwise, if `T` is a reference type:
+      - `!std::is_same_v<T, U>`,
+      - [`can_bind_reference<T, U>`](#can_bind_referencex-y).
+- *Postcondition:* `has_value() == other.has_value()`.
+
+---
+
+```cpp
+template<class U>
+constexpr explicit(/*see below*/) option(std::optional<U>&& other);
+```
+Converting move constructor. \
+Constructs an object of type `T` using *direct-list-initialization* with the expression `std::move(other.get())` if `other` contains a value. If `other` does not contain a value, construct an empty `opt::option` object instead.
+
+Description in the code equivalent:
+```cpp
+if (other.has_value()) {
+    {construct}(std::move(other.get()));
+}
+```
+Where `{construct}` is a function that constructs contained object in place.
+
+- *Defined* when [`OPTION_STD_OPTIONAL_COMPATIBILITY`][OPTION_STD_OPTIONAL_COMPATIBILITY] is true.
+- *`explicit`* when `!std::is_reference_v<T>` and `!std::is_convertible_v<U&&, T>`.
+- *Enabled* when the following conditions are true:
+    - If `T` is a non-reference type:
+      - `std::is_convertible_v<T, U&&>`.
+      - `std::is_same_v<std::remove_cv_t<T>, bool> || !is_constructible_from_option<T, U>`. ([`is_constructible_from_option`](#is_constructible_from_optionx-y),  [`remove_cvref`](#remove_cvrefx))
+    - Otherwise, if `T` is a reference type:
       - [`can_bind_reference<T, U>`](#can_bind_referencex-y).
 - *Postcondition:* `has_value() == other.has_value()`.
 
@@ -406,6 +460,80 @@ Where `{construct}` is a function that constructs contained object in place.
 - *Postcondition:* `has_value() == other.has_value()`.
 
 ---
+
+```cpp
+template<class U>
+constexpr option& operator=(const std::optional<U>& other);
+```
+Assigns this `opt::option` from `other`. \
+- If this `opt::option` and `other` do not contain a value, the function do nothing.
+- If this `opt::option` contains a value, but `other` does not, the contained value is destroyed.
+- If this `opt::option` do not contain a value, but `other` does, the contained value of type `T` is constructed using *direct-list-initialization* with the expression `*other`.
+- If this `opt::option` contains a value, and `other` does too, the contained value of type `T` is assigned with the expression `*other`.
+
+Description in the code equivalent:
+```cpp
+if (other.has_value()) {
+    if (has_value()) {
+        get() = *other;
+    } else {
+        {construct}(*other);
+    }
+} else {
+    reset();
+}
+```
+Where `{construct}` is a function that constructs contained object in place.
+
+- *Defined* when [`OPTION_STD_OPTIONAL_COMPATIBILITY`][OPTION_STD_OPTIONAL_COMPATIBILITY] is true.
+- *Enabled* when the following are all `true`:
+    - If `T` is a non-reference type:
+      - `is_initializable_from<T, const U&>`. ([`is_initializable_from`](#is_initializable_fromx-y))
+      - `std::is_assignable_v<T&, const U&>`.
+      - `!is_constructible_from_option<T, U>`. ([`is_constructible_from_option`](#is_constructible_from_optionx-y))
+      - `!is_assignable_from_option<T, U>`. ([`is_assignable_from_option`](#is_assignable_from_optionx-y))
+  - Otherwise, if `T` is a reference type:
+      - `can_bind_reference<T, U>`. ([`can_bind_reference`](#can_bind_referencex-y))
+- *Postcondition:* `has_value() == other.has_value()`.
+
+---
+
+```cpp
+template<class U = T>
+constexpr option& operator=(std::optional<U>&& other);
+```
+Assigns this `opt::option` from `other`.
+- If this `opt::option` and `other` do not contain a value, the function do nothing.
+- If this `opt::option` contains a value, but `other` does not, the contained value is destroyed.
+- If this `opt::option` do not contain a value, but `other` does, the contained value of type `T` is constructed using *direct-list-initialization* with the expression `std::move(*other)`.
+- If this `opt::option` contains a value, and `other` does too, the contained value of type `T` is assigned with the expression `std::move(*other)`.
+
+Description in the code equivalent:
+```cpp
+if (other.has_value()) {
+    if (has_value()) {
+        get() = std::move(*other);
+    } else {
+        {construct}(std::move(*other));
+    }
+} else {
+    reset();
+}
+```
+Where `{construct}` is a function that constructs contained object in place.
+
+!> After move, `other` still holds a value (if it had before), but the value itself is moved from.
+
+- *Defined* when [`OPTION_STD_OPTIONAL_COMPATIBILITY`][OPTION_STD_OPTIONAL_COMPATIBILITY] is true.
+- *Enabled* when the following are all `true`:
+    - If `T` is a non-reference type:
+      - `is_initializable_from<T, U&&>`. ([`is_initializable_from`](#is_initializable_fromx-y))
+      - `std::is_assignable_v<T&, U&&>`.
+      - `!is_constructible_from_option<T, U>`. ([`is_constructible_from_option`](#is_constructible_from_optionx-y))
+      - `!is_assignable_from_option<T, U>`. ([`is_assignable_from_option`](#is_assignable_from_optionx-y))
+  - Otherwise, if `T` is a reference type:
+      - `can_bind_reference<T, U>`. ([`can_bind_reference`](#can_bind_referencex-y))
+- *Postcondition:* `has_value() == other.has_value()`.
 
 ### `reset`
 

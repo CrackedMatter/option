@@ -61,6 +61,17 @@ TEST_CASE("construct from std::optional") {
     CHECK_EQ(d->x, 1);
 }
 
+TEST_CASE("assign from std::optional") {
+    opt::option<int> a;
+
+    const std::optional<int> val = 1;
+    a = val;
+    CHECK_EQ(a, 1);
+
+    a = std::optional<int>{2};
+    CHECK_EQ(a, 2);
+}
+
 TEST_SUITE_END();
 
 }

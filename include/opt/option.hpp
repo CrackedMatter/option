@@ -2729,6 +2729,14 @@ namespace impl {
             && std::is_assignable_v<T&, QualU>,
             check_option_like_ctor<T, U, QualU>, option_check_fail
         >;
+#if OPTION_STD_OPTIONAL_COMPATIBILITY
+        template<class T, class U, class QualU>
+        using from_std_optional_assign = if_<
+            is_initializable_from_v<T, QualU>
+            && std::is_assignable_v<T&, QualU>,
+            check_option_like_ctor<T, U, QualU>, option_check_fail
+        >;
+#endif // OPTION_STD_OPTIONAL_COMPATIBILITY
 
         template<class T, class U>
         using from_value_assign = std::enable_if<
@@ -2787,6 +2795,15 @@ namespace impl {
                 && (std::is_lvalue_reference_v<T> == std::is_lvalue_reference_v<U>))),
             always_assign, option_check_fail
         >;
+#if OPTION_STD_OPTIONAL_COMPATIBILITY
+        template<class T, class U, class QualU>
+        using from_std_optional_assign = if_<
+            (is_same_reference_wrapper_v<std::remove_reference_t<T>, std::remove_reference_t<U>>
+                || (std::is_convertible_v<std::remove_reference_t<U>*, std::remove_reference_t<T>*>
+                && (std::is_lvalue_reference_v<T> == std::is_lvalue_reference_v<U>))),
+            always_assign, option_check_fail
+        >;
+#endif // OPTION_STD_OPTIONAL_COMPATIBILITY
 
         template<class T, class U>
         using from_value_assign = std::enable_if<
@@ -3014,6 +3031,55 @@ public:
         }
         return *this;
     }
+
+#if OPTION_STD_OPTIONAL_COMPATIBILITY
+template<class U,
+        class = typename checks::template from_std_optional_assign<T, U, const U&>::assignment::type>
+    constexpr option& operator=(const std::optional<U>& other) {
+        if constexpr (std::is_reference_v<T>) {
+            if (other.has_value()) {
+                base::value = base::ref_to_ptr(*other);
+            } else {
+                reset();
+            }
+        } else {
+            if (other.has_value()) {
+                if (has_value()) {
+                    base::value = *other;
+                    OPTION_VERIFY(has_value(), "After assignment, the value is in an empty state");
+                } else {
+                    base::construct(*other);
+                }
+            } else {
+                reset();
+            }
+        }
+        return *this;
+    }
+    template<class U,
+        class = typename checks::template from_std_optional_assign<T, U, U&&>::assignment::type>
+    constexpr option& operator=(std::optional<U>&& other) {
+        if constexpr (std::is_reference_v<T>) {
+            if (other.has_value()) {
+                base::value = base::ref_to_ptr(*static_cast<std::optional<U>&&>(other));
+            } else {
+                reset();
+            }
+        } else {
+            if (other.has_value()) {
+                if (has_value()) {
+                    base::value = *static_cast<std::optional<U>&&>(other);
+                    OPTION_VERIFY(has_value(), "After assignment, the value is in an empty state");
+                } else {
+                    base::construct(*static_cast<std::optional<U>&&>(other));
+                }
+            } else {
+                reset();
+            }
+        }
+        return *this;
+    }
+#endif // OPTION_STD_OPTIONAL_COMPATIBILITY
 
     OPTION_NO_SANITIZE_OBJECT_SIZE
     [[nodiscard]] constexpr iterator begin() noexcept OPTION_LIFETIMEBOUND {
