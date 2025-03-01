@@ -293,7 +293,7 @@ void option_float_reset(opt::option<float>* a) {
 //$ mov byte ptr [rdi + 0x4], 0x0
 //$ ret
 
-//$ @optional_float_reset {clang & libcpp,clang & old-libstdcpp,gcc <13.0,gcc & old-libstdcpp,icx}:
+//$ @optional_float_reset {clang & libcpp,clang & old-libstdcpp,gcc <13.0,gcc & old-libstdcpp}:
 //$ cmp byte ptr [rdi + 0x4], 0x0
 //$ je <L0>
 //$ mov byte ptr [rdi + 0x4], 0x0
@@ -355,7 +355,7 @@ void option_bool_reset(opt::option<bool>* a) {
 //$ mov byte ptr [rdi + 0x1], 0x0
 //$ ret
 
-//$ @optional_bool_reset {clang & libcpp,clang & old-libstdcpp,gcc <13.0,gcc & old-libstdcpp,icx}:
+//$ @optional_bool_reset {clang & libcpp,clang & old-libstdcpp,gcc <13.0,gcc & old-libstdcpp}:
 //$ cmp byte ptr [rdi + 0x1], 0x0
 //$ je <L0>
 //$ mov byte ptr [rdi + 0x1], 0x0
