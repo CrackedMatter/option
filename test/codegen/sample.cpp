@@ -881,3 +881,66 @@ bool option_option_bool_has_value(opt::option<opt::option<bool>>* a) {
 bool option_option_bool_nested_has_value(opt::option<opt::option<bool>>* a) {
     return a->has_value() && (*a)->has_value();
 }
+
+//$ @option_float_cond_return:
+//$ test edi, edi
+//$ mov ecx, 0x3f800000
+//$ mov eax, 0xffbf69af
+//$ cmovne eax, ecx
+//$ ret
+
+//$ @option_float_cond_return {gcc <14}:
+//$ cmp dil, 0x1
+//$ sbb eax, eax
+//$ and eax, 0xc03f69af
+//$ add eax, 0x3f800000
+//$ ret
+
+//$ @option_float_cond_return {gcc 14}:
+//$ [disable]
+
+//$ @option_float_cond_return {icx}:
+//$ test dil, dil
+//$ mov ecx, 0x3f800000
+//$ mov eax, 0xffbf69af
+//$ cmovne eax, ecx
+//$ ret
+
+//$ @option_float_cond_return {clang-cl}:
+//$ mov rax, rcx
+//$ test dl, dl
+//$ mov ecx, 0x3f800000
+//$ mov edx, 0xffbf69af
+//$ cmovne edx, ecx
+//$ mov dword ptr [rax], edx
+//$ ret
+
+//$ @option_float_cond_return {msvc >=19.43}:
+//$ mov rax, rcx
+//$ test dl, dl
+//$ je <L0>
+//$ movss xmm0, dword ptr <class opt::option<float> __cdecl option_float_cond_return(bool)+0xf>
+//$ movss dword ptr [rcx], xmm0
+//$ ret
+//$ <L0>:
+//$ mov dword ptr [rcx], 0xffbf69af
+//$ ret
+
+//$ @option_float_cond_return {msvc <19.43}:
+//$ test dl, dl
+//$ je <L0>
+//$ movss xmm0, dword ptr <class opt::option<float> __cdecl option_float_cond_return(bool)+0xc>
+//$ movss dword ptr [rsp + 0x10], xmm0
+//$ mov eax, dword ptr [rsp + 0x10]
+//$ mov dword ptr [rcx], eax
+//$ mov rax, rcx
+//$ ret
+//$ <L0>:
+//$ mov dword ptr [rcx], 0xffbf69af
+//$ mov rax, rcx
+//$ ret
+opt::option<float> option_float_cond_return(bool a) {
+    return a ? opt::option<float>{1.f} : opt::none;
+}
+
+
