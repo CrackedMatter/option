@@ -641,7 +641,7 @@ jobs:
 
       - name: Cache Install Intel Compiler
         id: cache-icx
-        uses: actions/cache@v4.0.2
+        uses: actions/cache@v4.2.2
         with:
           path: /opt/intel/oneapi
           key: icx-2023
