@@ -47,6 +47,7 @@ function(target_add_warnings target)
                 -Wno-unsafe-buffer-usage
                 -Wno-unused-macros
                 -Wno-unused-template
+                -Wno-c++20-extensions
             )
         endif()
         if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
