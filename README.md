@@ -3,7 +3,7 @@
   <img src="docs/img/logo.png" width="300">
 </p>
 
-<a href=""><img src="docs/img/C++17.svg" alt="C++17"></a>
+<a href=""><img src="docs/img/C++20.svg" alt="C++20"></a>
 <a href=""><img src="docs/img/include_option_hpp.svg" alt="#include <opt/option.hpp>"></a>
 <a href="https://godbolt.org/z/bh4j1KfEs"><img src="docs/img/Compiler_Explorer.svg" alt="Compiler Explorer"></a>
 

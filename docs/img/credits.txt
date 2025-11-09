@@ -1,2 +1,2 @@
-C++17.svg - https://img.shields.io/badge/C++17-%2300599C.svg?logo=c%2B%2B&logoColor=white
+C++20.svg - https://img.shields.io/badge/C++20-%2300599C.svg?logo=c%2B%2B&logoColor=white
 Compiler_Explorer.svg - https://img.shields.io, https://github.com/compiler-explorer/compiler-explorer
