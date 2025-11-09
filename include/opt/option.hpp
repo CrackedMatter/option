@@ -250,18 +250,6 @@
     #define OPTION_CXX_VER __cplusplus
 #endif
 
-#if OPTION_CXX_VER >= 202002L
-    #define OPTION_IS_CXX20 1
-#else
-    #define OPTION_IS_CXX20 0
-#endif
-
-#if OPTION_IS_CXX20
-    #define OPTION_CONSTEXPR_CXX20 constexpr
-#else
-    #define OPTION_CONSTEXPR_CXX20 inline
-#endif
-
 #if OPTION_GCC || OPTION_CLANG
     #define OPTION_CURRENT_FUNCTION() __PRETTY_FUNCTION__
 #elif OPTION_MSVC
@@ -483,9 +471,7 @@ OPTION_STD_NAMESPACE_CXX11_END
     struct forward_iterator_tag; // Defined in header <iterator>
     struct bidirectional_iterator_tag; // Defined in header <iterator>
     struct random_access_iterator_tag; // Defined in header <iterator>
-#if OPTION_IS_CXX20
     struct contiguous_iterator_tag; // Defined in header <iterator>
-#endif
     template<class T>
     struct hash; // Defined in header <functional>
 
@@ -506,14 +492,11 @@ OPTION_STD_NAMESPACE_END
     #include <complex>
 #endif
 
-#if OPTION_IS_CXX20
-    #include <memory> // for std::construct_at
-#endif
+#include <memory> // for std::construct_at, std::addressof
 
 #if OPTION_HAS_BUILTIN(__builtin_addressof) || OPTION_MSVC
     #define OPTION_ADDRESSOF(x) __builtin_addressof(x)
 #else
-    #include <memory>
     #define OPTION_ADDRESSOF(x) ::std::addressof(x)
 #endif
 
@@ -653,27 +636,6 @@ namespace impl {
     constexpr decltype(auto) invoke(T C::* obj, std::reference_wrapper<First> first) {
         return first.get().*obj;
     }
-
-#if OPTION_IS_CXX20
-    using std::construct_at;
-#else
-    template<class T, class... Args>
-    constexpr void construct_at(T* ptr, Args&&... args) {
-        if constexpr (impl::is_trivially_move_assignable_v<T>) {
-            if constexpr (std::is_aggregate_v<T>) {
-                *ptr = T{static_cast<Args&&>(args)...};
-            } else {
-                *ptr = T(static_cast<Args&&>(args)...);
-            }
-        } else {
-            if constexpr (std::is_aggregate_v<T>) {
-                ::new(static_cast<void*>(ptr)) T{static_cast<Args&&>(args)...};
-            } else {
-                ::new(static_cast<void*>(ptr)) T(static_cast<Args&&>(args)...);
-            }
-        }
-    }
-#endif
 
     template<class T, class Traits, class = std::uintmax_t>
     inline constexpr bool has_get_level_method = false;
@@ -1399,7 +1361,7 @@ namespace impl {
         static void set_level(std::basic_string_view<Elem, Traits>* const value, const std::uintmax_t level) noexcept {
             OPTION_VERIFY(level < max_level, "Level is out of range");
             const Elem* const ptr = reinterpret_cast<const Elem*>(sentinel_ptr + level);
-            impl::construct_at(value, ptr, std::size_t(0));
+            std::construct_at(value, ptr, std::size_t(0));
         }
     };
     template<class Elem>
@@ -1415,7 +1377,7 @@ namespace impl {
         }
         static void set_level(std::unique_ptr<Elem, std::default_delete<Elem>>* const value, const std::uintmax_t level) noexcept {
             OPTION_VERIFY(level < max_level, "Level is out of range");
-            impl::construct_at(value, reinterpret_cast<Elem*>(sentinel_ptr + level));
+            std::construct_at(value, reinterpret_cast<Elem*>(sentinel_ptr + level));
         }
     };
 
@@ -1824,29 +1786,6 @@ namespace impl {
     template<class Tuple>
     using tuple_like_of_options_t = typename tuple_like_of_options<Tuple>::type;
 
-#if !OPTION_IS_CXX20
-    template<bool IsAggregate, bool IsConstructible, class, class T, class... Args>
-    struct is_initializable_from_impl
-        : std::bool_constant<IsConstructible> {};
-
-    template<class T, class... Args>
-    struct is_initializable_from_impl<true, false, decltype(T{std::declval<Args>()...}, void()), T, Args...>
-        : std::true_type {};
-
-    #if !OPTION_MSVC
-    template<class T, class... Args>
-    using is_initializable_from = is_initializable_from_impl<std::is_aggregate_v<T>, std::is_constructible_v<T, Args...>, void, T, Args...>;
-    #else // ^^^ !OPTION_MSVC / vvv OPTION_MSVC
-    template<class T, class... Args>
-    using is_initializable_from = is_initializable_from_impl<__is_aggregate(T), __is_constructible(T, Args...), void, T, Args...>;
-    #endif
-#else // ^^^ !OPTION_IS_CXX20 / vvv OPTION_IS_CXX20
-    template<class T, class... Args>
-    using is_initializable_from = std::is_constructible<T, Args...>;
-#endif
-    template<class T, class... Args>
-    inline constexpr bool is_initializable_from_v = is_initializable_from<T, Args...>::value;
-
     template<class T>
     struct member_type {
         static_assert(!sizeof(T), "Expected pointer to data member");
@@ -1944,7 +1883,7 @@ namespace impl {
         }
         template<class... Args>
         constexpr void construct(Args&&... args) {
-            impl::construct_at(OPTION_ADDRESSOF(value), static_cast<Args&&>(args)...);
+            std::construct_at(OPTION_ADDRESSOF(value), static_cast<Args&&>(args)...);
             has_value_flag = true;
         }
     };
@@ -1971,7 +1910,7 @@ namespace impl {
         constexpr option_destruct_base(construct_from_invoke_tag, F&& f, Arg&& arg)
             : value{impl::invoke(static_cast<F&&>(f), static_cast<Arg&&>(arg))}, has_value_flag(true) {}
 
-        OPTION_CONSTEXPR_CXX20 ~option_destruct_base() {
+        constexpr ~option_destruct_base() {
             if (has_value_flag) {
                 value.~T();
             }
@@ -1988,7 +1927,7 @@ namespace impl {
         }
         template<class... Args>
         constexpr void construct(Args&&... args) {
-            impl::construct_at(OPTION_ADDRESSOF(value), static_cast<Args&&>(args)...);
+            std::construct_at(OPTION_ADDRESSOF(value), static_cast<Args&&>(args)...);
             has_value_flag = true;
         }
     };
@@ -2038,7 +1977,7 @@ namespace impl {
         }
         template<class... Args>
         constexpr void construct(Args&&... args) {
-            impl::construct_at(OPTION_ADDRESSOF(value), static_cast<Args&&>(args)...);
+            std::construct_at(OPTION_ADDRESSOF(value), static_cast<Args&&>(args)...);
             OPTION_VERIFY(has_value(), "After the construction, the value is in an empty state. Possibly because of the constructor arguments");
         }
     };
@@ -2073,7 +2012,7 @@ namespace impl {
             : value{impl::invoke(static_cast<F&&>(f), static_cast<Arg&&>(arg))} {
             OPTION_VERIFY(has_value(), "After the construction, the value is in an empty state. Possibly because of the constructor arguments");
         }
-        OPTION_CONSTEXPR_CXX20 ~option_destruct_base() {
+        constexpr ~option_destruct_base() {
             if (has_value()) {
                 value.~T();
             }
@@ -2091,7 +2030,7 @@ namespace impl {
         }
         template<class... Args>
         constexpr void construct(Args&&... args) {
-            impl::construct_at(OPTION_ADDRESSOF(value), static_cast<Args&&>(args)...);
+            std::construct_at(OPTION_ADDRESSOF(value), static_cast<Args&&>(args)...);
             OPTION_VERIFY(has_value(), "After the construction, the value is in an empty state. Possibly because of the constructor arguments");
         }
     };
@@ -2394,9 +2333,7 @@ namespace impl {
     template<class T>
     class option_iterator {
     public:
-#if OPTION_IS_CXX20
         using iterator_concept = std::contiguous_iterator_tag;
-#endif
         using iterator_category = std::random_access_iterator_tag;
         using value_type = std::remove_reference_t<T>;
         using reference = value_type&;
@@ -2646,7 +2583,7 @@ namespace impl {
     struct check_from_value_ctor {
         template<bool Condition>
         using is_explicit = std::enable_if<
-            (std::is_convertible_v<U, T> != Condition) && is_initializable_from_v<T, U>
+            (std::is_convertible_v<U, T> != Condition) && std::is_constructible_v<T, U>
         , int>;
     };
     template<class T, class U, class QualU>
@@ -2698,41 +2635,41 @@ namespace impl {
         using from_args_ctor = std::enable_if<
             is_not_same_v<remove_cvref<First>, opt::option<T>>
             && is_not_same_v<remove_cvref<First>, std::in_place_t>
-            && is_initializable_from_v<T, First, Args...>
+            && std::is_constructible_v<T, First, Args...>
         >;
         
         template<class T, class InPlaceT, class... Args>
         using from_in_place_args_ctor = std::enable_if<
             and_v<
                 std::is_same<InPlaceT, std::in_place_t>,
-                is_initializable_from<T, Args...>
+                std::is_constructible<T, Args...>
             >
         >;
 
         template<class T, class U, class QualU>
         using from_option_like_ctor = if_<
             is_not_same_v<U, T>
-            && is_initializable_from_v<T, QualU>,
+            && std::is_constructible_v<T, QualU>,
             check_option_like_ctor<T, U, QualU>, option_check_fail
         >;
 #if OPTION_STD_OPTIONAL_COMPATIBILITY
         template<class T, class U, class QualU>
         using from_std_optional_ctor = if_<
-            is_initializable_from_v<T, QualU>,
+            std::is_constructible_v<T, QualU>,
             check_option_like_ctor<T, U, QualU>, option_check_fail
         >;
 #endif // OPTION_STD_OPTIONAL_COMPATIBILITY
         template<class T, class U, class QualU>
         using from_option_like_assign = if_<
             is_not_same_v<U, T>
-            && is_initializable_from_v<T, QualU>
+            && std::is_constructible_v<T, QualU>
             && std::is_assignable_v<T&, QualU>,
             check_option_like_ctor<T, U, QualU>, option_check_fail
         >;
 #if OPTION_STD_OPTIONAL_COMPATIBILITY
         template<class T, class U, class QualU>
         using from_std_optional_assign = if_<
-            is_initializable_from_v<T, QualU>
+            std::is_constructible_v<T, QualU>
             && std::is_assignable_v<T&, QualU>,
             check_option_like_ctor<T, U, QualU>, option_check_fail
         >;
@@ -2741,7 +2678,7 @@ namespace impl {
         template<class T, class U>
         using from_value_assign = std::enable_if<
             is_not_same_v<remove_cvref<U>, opt::option<T>>
-            && is_initializable_from_v<T, U>
+            && std::is_constructible_v<T, U>
             && std::is_assignable_v<T&, U>
         >;
     };
@@ -4102,7 +4039,7 @@ namespace impl {
     struct type_wrapper {
         T m{};
 
-        template<class... Args, std::enable_if_t<impl::is_initializable_from_v<T, Args...>, int> = 0>
+        template<class... Args, std::enable_if_t<std::is_constructible_v<T, Args...>, int> = 0>
         constexpr explicit type_wrapper(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>)
             : m{static_cast<Args&&>(args)...} {}
 

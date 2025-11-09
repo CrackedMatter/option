@@ -27,7 +27,7 @@ target_include_directories(option ${include_as_system} INTERFACE
     "$<INSTALL_INTERFACE:include>"
 )
 
-target_compile_features(option INTERFACE cxx_std_17)
+target_compile_features(option INTERFACE cxx_std_20)
 
 if (OPTION_USE_NATVIS)
     target_sources(option INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/debugger/option.natvis>)
