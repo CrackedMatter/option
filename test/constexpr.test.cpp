@@ -48,12 +48,10 @@ TEST_CASE("constructors") {
         opt::option<int> a{};
         opt::option<long long> b{a};
     }(), true));
-#if OPTION_IS_CXX20
     static_assert(([] {
         opt::option<int> a{1};
         opt::option<long long> b{a};
     }(), true));
-#endif
 }
 
 TEST_CASE("operator=") {
@@ -105,12 +103,10 @@ TEST_CASE("operator=") {
         a = opt::option<int>{1};
     }(), true));
     // operator=(U&&)
-#if OPTION_IS_CXX20
     static_assert(([] {
         opt::option<int> a;
         a = 1;
     }(), true));
-#endif
     static_assert(([] {
         opt::option<int> a{1};
         a = 1;
@@ -121,13 +117,11 @@ TEST_CASE("operator=") {
         const opt::option<int> b;
         a = b;
     }(), true));
-#if OPTION_IS_CXX20
     static_assert(([] {
         opt::option<long long> a;
         const opt::option<int> b{1};
         a = b;
     }(), true));
-#endif
     static_assert(([] {
         opt::option<long long> a{1};
         const opt::option<int> b;
@@ -143,12 +137,10 @@ TEST_CASE("operator=") {
         opt::option<long long> a;
         a = opt::option<int>{};
     }(), true));
-#if OPTION_IS_CXX20
     static_assert(([] {
         opt::option<long long> a;
         a = opt::option<int>{1};
     }(), true));
-#endif
     static_assert(([] {
         opt::option<long long> a{1};
         a = opt::option<int>{};
@@ -189,12 +181,10 @@ TEST_CASE("reset") {
 }
 
 TEST_CASE("emplace") {
-#if OPTION_IS_CXX20
     static_assert(([] {
         opt::option<int> a;
         a.emplace(1);
     }(), true));
-#endif
     static_assert(([] {
         opt::option<int> a{1};
         a.emplace(1);
